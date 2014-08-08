@@ -97,7 +97,7 @@ def main():
     hostname = re.search(r'^([a-zA-Z0-9-]+).*', str(sysName)).group(1)  # assigns and strips out the hostname
 
     for idx in ifIndex:
-        desc = str(ifDescr[idx]).replace('/', '_')  # interface name; change / into _ to help grahite tree organisation
+        desc = re.sub('[/.]','_',str(ifDescr[idx]))  # interface name; change / or . into _ to help grahite tree organisation
         for metric_name in metrics:
             try:
                 # append value: ('prefix.hostname.ifDesc.ifMetric', (timestamp, value))
