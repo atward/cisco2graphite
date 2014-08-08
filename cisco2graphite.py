@@ -99,16 +99,19 @@ def main():
     for idx in ifIndex:
         desc = str(ifDescr[idx]).replace('/', '_')  # interface name; change / into _ to help grahite tree organisation
         for metric_name in metrics:
-            # append value: ('prefix.hostname.ifDesc.ifMetric', (timestamp, value))
-            data.append(("%s.%s.%s.%s" % (
-                    options.prefix,
-                    hostname,
-                    desc,
-                    metric_name
-                ),(
-                    timestamp,
-                    int(metrics[metric_name][idx])
-                )))
+            try:
+                # append value: ('prefix.hostname.ifDesc.ifMetric', (timestamp, value))
+                data.append(("%s.%s.%s.%s" % (
+                        options.prefix,
+                        hostname,
+                        desc,
+                        metric_name
+                    ),(
+                        timestamp,
+                        int(metrics[metric_name][idx])
+                    )))
+            except KeyError:
+                pass
 
     # send gathered data to carbon server as a pickle packet
     payload = pickle.dumps(data)
