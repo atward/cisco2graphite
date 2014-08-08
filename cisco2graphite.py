@@ -53,6 +53,9 @@ def main():
     parser.add_option("-d", "--debug", dest="debug",
         help="do not send to carbon",
         action="store_true", default=False)
+    parser.add_option("-x", "--alias", dest="alias",
+        help="use ifAlias instead of ifDescr",
+        action="store_true", default=False)
 
     (options, args) = parser.parse_args()
     if len(args) != 2:
@@ -78,7 +81,11 @@ def main():
     _get = lambda oid: getall_oid(target_host, options.community, options.snmpport, oid)
 
     ifIndex = _get((1, 3, 6, 1, 2, 1, 2, 2, 1, 1))
-    ifDescr = _get((1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1))
+    if options.alias:
+        ifDescr = _get((1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 18))
+    else:
+        ifDescr = _get((1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1))
+
     metrics = {
         'ifSpeed'        : _get((1, 3, 6, 1, 2, 1, 2, 2, 1, 5)),
         'ifAdminStatus'  : { i: v==1  # 1: UP 2: DOWN
@@ -97,7 +104,10 @@ def main():
     hostname = re.search(r'^([a-zA-Z0-9-]+).*', str(sysName)).group(1)  # assigns and strips out the hostname
 
     for idx in ifIndex:
-        desc = re.sub('[/.]','_',str(ifDescr[idx]))  # interface name; change / or . into _ to help grahite tree organisation
+        desc = re.sub('[/. ]','_',str(ifDescr[idx])).strip('_')
+        if not desc:
+            continue
+
         for metric_name in metrics:
             try:
                 # append value: ('prefix.hostname.ifDesc.ifMetric', (timestamp, value))
