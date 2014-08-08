@@ -129,7 +129,8 @@ def main():
     message = header + payload
 
     if options.debug:
-        pprint(data)
+        for k,v in data:
+            print k, v[1]
     else:
         sock.sendall(message)
         sock.close()
